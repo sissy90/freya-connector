@@ -1,5 +1,7 @@
 const io = require('socket.io-client');
 const config = require('./config.json');
+var HttpProxyAgent = require('http-proxy-agent');
+
 
 // import python script
 const spawn = require("child_process").spawn;
@@ -12,8 +14,23 @@ if(process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.a
 	console.log(`ws://${config.server_dev}:80`);
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
+else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'pi') {
+	var isDev = false;
+	let p = 'http://192.168.49.1:8000';
+	let agent = new HttpProxyAgent(p);
+	var conn_options = {
+		'sync disconnect on unload':false,
+		agent: agent
+	};
+	console.log(`ws://${config.server_dev}:80`);
+	var socket = io(`ws://${config.server_dev}:80`, conn_options);
+}
 else {
 	var isDev = false;
+	var conn_options = {
+		'sync disconnect on unload':false
+	};
+	console.log(`ws://${config.server_prod}:80`);
 	var socket = io(`socket://${config.server_prod}:80`, conn_options);
 }
 
