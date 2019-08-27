@@ -14,12 +14,6 @@ power_ = int(sys.argv[2])
 time_ = float(sys.argv[3])
 channel_ = int(sys.argv[4])
 
-print("mode")
-print(mode_)
-print("power")
-print(power_)
-print("time")
-print(time_)
 
 try:
     len(str(sys.argv[5]))
@@ -31,8 +25,8 @@ else:
     else:
         key_ = str(sys.argv[5])
 
-print("key")
-print(key_)
+print("mode: ", mode_, ", power: ", power_, ", time: ", time_, ", key: ", key_)
+
 pi = pigpio.pi() # set the 'pi' variable to mean wean we need to access LOCAL pi
 
 #string transmission module
