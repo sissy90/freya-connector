@@ -14,7 +14,7 @@ if(process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.a
 	console.log(`ws://${config.server_dev}:80`);
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
-else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'pi') {
+else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'proxy') {
 	var isDev = false;
 	let p = 'http://192.168.49.1:8000';
 	let agent = new HttpProxyAgent(p);
@@ -22,7 +22,7 @@ else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && pro
 		'sync disconnect on unload':false,
 		agent: agent
 	};
-	console.log(`ws://${config.server_dev}:80`);
+	console.log(`ws://${config.server_dev}:80 via proxy`);
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
 else {
@@ -106,16 +106,16 @@ socket.on('message', dataStr => {
 							console.log("Dev...python script disabled...");
 						}
 							break;
-						case 'vibrate':
+						case 'vibe':
 							// handle max values for power and time
-							if(data.power > config.commandOptions.vibrate.powerLimit) {
-								data.power = config.commandOptions.vibrate.powerLimit;
+							if(data.power > config.commandOptions.vibe.powerLimit) {
+								data.power = config.commandOptions.vibe.powerLimit;
 							}
-							if(data.time > config.commandOptions.vibrate.timeLimit) {
-								data.time = config.commandOptions.vibrate.timeLimit;
+							if(data.time > config.commandOptions.vibe.timeLimit) {
+								data.time = config.commandOptions.vibe.timeLimit;
 							}
 							if(!isDev){
-								const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.vibrate.transmitMode, data.power, data.time, config.commandOptions.vibrate.defaultChannel]);
+								const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.vibe.transmitMode, data.power, data.time, config.commandOptions.vibe.defaultChannel]);
 								pythonProcess.stdout.on('data', function(data) {
 									console.log(data.toString());
 								});
