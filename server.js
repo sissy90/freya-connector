@@ -1,5 +1,6 @@
 const io = require('socket.io-client');
-const config = require('./config.json');
+const fs = require('fs');
+var config = require('./config.json');
 var HttpProxyAgent = require('http-proxy-agent');
 
 
@@ -14,7 +15,7 @@ if(process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.a
 	console.log(`ws://${config.server_dev}:80`);
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
-else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'proxy') {
+else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'pi') {
 	var isDev = false;
 	let p = 'http://192.168.49.1:8000';
 	let agent = new HttpProxyAgent(p);
@@ -87,7 +88,16 @@ socket.on('message', dataStr => {
 				// we have a valid user, now check supported commands
 				if (config.commands.indexOf(data.command) !== -1) {
 					// we have a valid command supported by the user
+					output = {
+						success: true,
+						channel: data.channel,
+						message: `success!`,
+						data: data
+					};
 					switch (data.command) {
+						//-----------------------------------------------------------------------------
+						// zap
+						//-----------------------------------------------------------------------------
 						case 'zap':
 							// handle max values for power and time
 							if(data.power > config.commandOptions.zap.powerLimit) {
@@ -106,6 +116,9 @@ socket.on('message', dataStr => {
 							console.log("Dev...python script disabled...");
 						}
 							break;
+						//-----------------------------------------------------------------------------
+						// vibe
+						//-----------------------------------------------------------------------------
 						case 'vibe':
 							// handle max values for power and time
 							if(data.power > config.commandOptions.vibe.powerLimit) {
@@ -124,15 +137,49 @@ socket.on('message', dataStr => {
 								console.log("Dev...python script disabled...");
 							}
 							break;
+						//-----------------------------------------------------------------------------
+						// trust
+						//-----------------------------------------------------------------------------
+						case 'trust':
+							switch (data.method) {
+								case 'add':
+									output.message = `Adding ${data.username.split('#')[0]} to ${data.initUser.split('#')[0]}'s trusted list.`;
+									addTrustedUser(data.username);
+									break;
+								case 'remove':
+									output.message = `Removing ${data.username.split('#')[0]} from ${data.initUser.split('#')[0]}'s trusted list.`;
+									removeTrustedUser(data.username);
+									break;
+								case 'list':
+									output.message = `${data.initUser.split('#')[0]}'s trusted users:`;
+									for (var i = 0; i < config.trustedUsers.length; i++) {
+										output.message += `\n${config.trustedUsers[i].split('#')[0]}`
+									}
+									break;
+								default:
+
+							}
+							break;
+						//-----------------------------------------------------------------------------
+						// limit
+						//-----------------------------------------------------------------------------
+						case 'limit':
+							switch (data.method) {
+								case 'zap':
+									output.message = `Setting ${data.initUser.split('#')[0]}'s zap limit to ${data.time} seconds @ ${data.power}%.`;
+									setZapLimits(data.time, data.power);
+									break;
+								case 'vibe':
+									output.message = `Setting ${data.initUser.split('#')[0]}'s vibe limit to ${data.time} seconds @ ${data.power}%.`;
+									setVibeLimits(data.time, data.power);
+									break;
+								default:
+
+							}
+							break;
 						default:
 					}
 
-					output = {
-						success: true,
-						channel: data.channel,
-						message: `success!`,
-						data: data
-					};
 					socket.emit('message', JSON.stringify(output));
 				}
 				else {
@@ -161,3 +208,42 @@ socket.on('message', dataStr => {
 	}
 
 });
+
+// ----------------------------------------------------------------------------
+// --------------------------- [private methods] ------------------------------
+// ----------------------------------------------------------------------------
+function addTrustedUser(username) {
+	if(config.trustedUsers.indexOf(username) === -1) {
+		// only add the user if it's not already there
+		config.trustedUsers.push(username);
+		saveConfig();
+	}
+}
+
+function removeTrustedUser(username) {
+	var index = config.trustedUsers.indexOf(username);
+	if(index !== -1) {
+		// only remove the user if they are already there
+		config.trustedUsers.splice(index, 1);
+		saveConfig();
+	}
+}
+
+function setZapLimits(time, power) {
+	config.commandOptions.zap.timeLimit = time;
+	config.commandOptions.zap.powerLimit = power;
+	saveConfig();
+}
+
+function setVibeLimits(time, power) {
+	config.commandOptions.vibe.timeLimit = time;
+	config.commandOptions.vibe.powerLimit = power;
+	saveConfig();
+}
+
+function saveConfig() {
+	var json = JSON.stringify(config, null, 2);
+	fs.writeFile('./config.json', json, 'utf8', () => {
+		console.log('Config update finished.');
+	});
+}

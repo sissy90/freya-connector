@@ -1,31 +1,32 @@
 {
-	"username": "sissy90",
-	"trustedUsers": [
-		"Ashley#5112",
-		"sissy90#9698",
-		"HelloFrom-LV#6716",
-		"Locked'N'Loaded#5935"
-	],
-	"commands": ["zap", "vibe"],
-	"commandOptions": {
-		"zap": {
-			"timeLimit": 4,
-			"powerLimit": 40,
-			"defaultChannel": "1",
-			"transmitMode": 4
-		},
-		"vibe": {
-			"timeLimit": 9,
-			"powerLimit": 100,
-			"defaultChannel": "1",
-			"transmitMode": 3
-		}
-	},
-
-	"ADVANCED_OPTIONS_DO_NOT_CHANGE": "---------------------------------------",
-
-	"defaultDiscordChannel": "614949907803013125",
-	"server_dev": "45.55.107.167",
-	"server_prod": "45.55.107.167"
-
+  "server_dev": "localhost",
+  "server_prod": "45.55.107.167",
+  "username": "sissy90#9698",
+  "commands": [
+    "zap",
+    "vibe",
+    "trust",
+    "limit"
+  ],
+  "trustedUsers": [
+    "Ashley#5112",
+    "sissy90#9698",
+    "HelloFrom-LV#6716",
+    "Misty#7321"
+  ],
+  "commandOptions": {
+    "zap": {
+      "timeLimit": 4,
+      "powerLimit": 50,
+      "defaultChannel": "1",
+      "transmitMode": 4
+    },
+    "vibe": {
+      "timeLimit": 10,
+      "powerLimit": 100,
+      "defaultChannel": "1",
+      "transmitMode": 3
+    }
+  },
+  "defaultDiscordChannel": "614949907803013125"
 }
