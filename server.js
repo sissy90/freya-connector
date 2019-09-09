@@ -32,7 +32,7 @@ else {
 		'sync disconnect on unload':false
 	};
 	console.log(`ws://${config.server_prod}:80`);
-	var socket = io(`socket://${config.server_prod}:80`, conn_options);
+	var socket = io(`ws://${config.server_prod}:80`, conn_options);
 }
 
 socket.on('connect', () => {
