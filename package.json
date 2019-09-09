@@ -1,5 +1,5 @@
 {
-  "name": "johnson-connector",
+  "name": "freya-connector",
   "main": "server.js",
   "dependencies": {
     "http-proxy-agent": "^2.1.0",
