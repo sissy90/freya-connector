@@ -7,7 +7,9 @@ var HttpProxyAgent = require('http-proxy-agent');
 // import python script
 const spawn = require("child_process").spawn;
 
+// set up websocket connection
 if(process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'dev') {
+	// dev mode
 	var isDev = true;
 	var conn_options = {
 		'sync disconnect on unload':false
@@ -16,6 +18,7 @@ if(process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.a
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
 else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && process.argv[2] == 'pi') {
+	// proxy connect mode
 	var isDev = false;
 	let p = 'http://192.168.49.1:8000';
 	let agent = new HttpProxyAgent(p);
@@ -27,6 +30,7 @@ else if (process.argv.length > 2 && typeof process.argv[2] != 'undefined' && pro
 	var socket = io(`ws://${config.server_dev}:80`, conn_options);
 }
 else {
+	// standard mode
 	var isDev = false;
 	var conn_options = {
 		'sync disconnect on unload':false
@@ -83,7 +87,7 @@ socket.on('message', dataStr => {
 		else {
 			// check if the initiating user has permission to send commands
 			let validUser = false;
-			validUser = (config.trustedUsers.indexOf(data.initUser) !== -1);
+			validUser = (config.trustedUsers.indexOf(data.initUser) !== -1 || data.initUser == config.username);
 			if(validUser) {
 				// we have a valid user, now check supported commands
 				if (config.commands.indexOf(data.command) !== -1) {
@@ -187,7 +191,7 @@ socket.on('message', dataStr => {
 					output = {
 						success: false,
 						channel: data.channel,
-						message: `${data.username} does not support the ${data.command} command.`,
+						message: `${data.username.split('#')[0]} does not support the ${data.command} command.`,
 						data: data
 					};
 					socket.emit('message', JSON.stringify(output));
@@ -198,7 +202,7 @@ socket.on('message', dataStr => {
 				output = {
 					success: false,
 					channel: data.channel,
-					message: `${data.initUser.split('#')[0]} does not have permission to send ${data.username} commands.`,
+					message: `${data.initUser.split('#')[0]} does not have permission to send ${data.username.split('#')[0]} commands.`,
 					data: data
 				};
 				socket.emit('message', JSON.stringify(output));
@@ -208,6 +212,23 @@ socket.on('message', dataStr => {
 	}
 
 });
+
+// keep connection to collar alive
+if(!isDev){
+	function keepAlive() {
+	    setTimeout(function () {
+			console.log('INFO => sending keep alive signal.');
+			// vibe for 2 seconds @5% every 4 minutes
+			const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.vibe.transmitMode, '5', '2', config.commandOptions.vibe.defaultChannel]);
+			pythonProcess.stdout.on('data', function(data) {
+				console.log(data.toString());
+			});
+	        keepAlive();
+	    }, 240000);
+	}
+	keepAlive();
+}
+
 
 // ----------------------------------------------------------------------------
 // --------------------------- [private methods] ------------------------------
