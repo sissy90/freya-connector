@@ -44,9 +44,8 @@ socket.on('connect', () => {
 	// connect to server and set username
 	let output = {
 		username: config.username,
-		commands: config.commands.join(),
 		defaultChannel: config.defaultDiscordChannel,
-		initWS: true
+		trustedUsers: config.trustedUsers
 	};
 	socket.emit('userconnect', JSON.stringify(output));
 });
@@ -90,112 +89,124 @@ socket.on('message', dataStr => {
 			validUser = (config.trustedUsers.indexOf(data.initUser) !== -1 || data.initUser == config.username);
 			if(validUser) {
 				// we have a valid user, now check supported commands
-				if (config.commands.indexOf(data.command) !== -1) {
-					// we have a valid command supported by the user
-					output = {
-						success: true,
-						channel: data.channel,
-						message: `success!`,
-						data: data
-					};
-					switch (data.command) {
-						//-----------------------------------------------------------------------------
-						// zap
-						//-----------------------------------------------------------------------------
-						case 'zap':
-							// handle max values for power and time
-							if(data.power > config.commandOptions.zap.powerLimit) {
-								data.power = config.commandOptions.zap.powerLimit;
-							}
-							if(data.time > config.commandOptions.zap.timeLimit) {
-								data.time = config.commandOptions.zap.timeLimit;
-							}
-							if(!isDev){
-								const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.zap.transmitMode, data.power, data.time, config.commandOptions.zap.defaultChannel]);
-								pythonProcess.stdout.on('data', function(data) {
-									console.log(data.toString());
-								});
-							}
+				output = {
+					success: true,
+					channel: data.channel,
+					message: `success!`,
+					data: data
+				};
+				switch (data.command) {
+					//-----------------------------------------------------------------------------
+					// zap
+					//-----------------------------------------------------------------------------
+					case 'zap':
+						// handle max values for power and time
+						if(data.power > config.commandOptions.zap.powerLimit) {
+							data.power = config.commandOptions.zap.powerLimit;
+						}
+						if(data.time > config.commandOptions.zap.timeLimit) {
+							data.time = config.commandOptions.zap.timeLimit;
+						}
+						if(!isDev){
+							const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.zap.transmitMode, data.power, data.time, config.commandOptions.zap.defaultChannel]);
+							pythonProcess.stdout.on('data', function(data) {
+								console.log(data.toString());
+							});
+						}
 						else {
 							console.log("Dev...python script disabled...");
 						}
-							break;
-						//-----------------------------------------------------------------------------
-						// vibe
-						//-----------------------------------------------------------------------------
-						case 'vibe':
-							// handle max values for power and time
-							if(data.power > config.commandOptions.vibe.powerLimit) {
-								data.power = config.commandOptions.vibe.powerLimit;
-							}
-							if(data.time > config.commandOptions.vibe.timeLimit) {
-								data.time = config.commandOptions.vibe.timeLimit;
-							}
-							if(!isDev){
-								const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.vibe.transmitMode, data.power, data.time, config.commandOptions.vibe.defaultChannel]);
-								pythonProcess.stdout.on('data', function(data) {
-									console.log(data.toString());
-								});
-							}
-							else {
-								console.log("Dev...python script disabled...");
-							}
-							break;
-						//-----------------------------------------------------------------------------
-						// trust
-						//-----------------------------------------------------------------------------
-						case 'trust':
-							switch (data.method) {
-								case 'add':
-									output.message = `Adding ${data.username.split('#')[0]} to ${data.initUser.split('#')[0]}'s trusted list.`;
-									addTrustedUser(data.username);
-									break;
-								case 'remove':
-									output.message = `Removing ${data.username.split('#')[0]} from ${data.initUser.split('#')[0]}'s trusted list.`;
-									removeTrustedUser(data.username);
-									break;
-								case 'list':
-									output.message = `${data.initUser.split('#')[0]}'s trusted users:`;
-									for (var i = 0; i < config.trustedUsers.length; i++) {
-										output.message += `\n${config.trustedUsers[i].split('#')[0]}`
-									}
-									break;
-								default:
+						break;
+					//-----------------------------------------------------------------------------
+					// vibe
+					//-----------------------------------------------------------------------------
+					case 'vibe':
+						// handle max values for power and time
+						if(data.power > config.commandOptions.vibe.powerLimit) {
+							data.power = config.commandOptions.vibe.powerLimit;
+						}
+						if(data.time > config.commandOptions.vibe.timeLimit) {
+							data.time = config.commandOptions.vibe.timeLimit;
+						}
+						if(!isDev){
+							const pythonProcess = spawn('python',["./transmit.py", config.commandOptions.vibe.transmitMode, data.power, data.time, config.commandOptions.vibe.defaultChannel]);
+							pythonProcess.stdout.on('data', function(data) {
+								console.log(data.toString());
+							});
+						}
+						else {
+							console.log("Dev...python script disabled...");
+						}
+						break;
+					//-----------------------------------------------------------------------------
+					// trust
+					//-----------------------------------------------------------------------------
+					case 'trust':
+						switch (data.method) {
+							case 'add':
+								output.message = `Adding ${data.username.split('#')[0]} to ${data.initUser.split('#')[0]}'s trusted list.`;
+								addTrustedUser(data.username);
+								break;
+							case 'remove':
+								output.message = `Removing ${data.username.split('#')[0]} from ${data.initUser.split('#')[0]}'s trusted list.`;
+								removeTrustedUser(data.username);
+								break;
+							case 'list':
+								output.message = `${data.initUser.split('#')[0]}'s trusted users:`;
+								for (var i = 0; i < config.trustedUsers.length; i++) {
+									output.message += `\n${config.trustedUsers[i].split('#')[0]}`
+								}
+								break;
+							default:
 
-							}
-							break;
-						//-----------------------------------------------------------------------------
-						// limit
-						//-----------------------------------------------------------------------------
-						case 'limit':
-							switch (data.method) {
-								case 'zap':
-									output.message = `Setting ${data.initUser.split('#')[0]}'s zap limit to ${data.time} seconds @ ${data.power}%.`;
-									setZapLimits(data.time, data.power);
-									break;
-								case 'vibe':
-									output.message = `Setting ${data.initUser.split('#')[0]}'s vibe limit to ${data.time} seconds @ ${data.power}%.`;
-									setVibeLimits(data.time, data.power);
-									break;
-								default:
+						}
+						break;
+					//-----------------------------------------------------------------------------
+					// limit
+					//-----------------------------------------------------------------------------
+					case 'limit':
+						switch (data.method) {
+							case 'zap':
+								output.message = `Setting ${data.initUser.split('#')[0]}'s zap limit to ${data.time} seconds @ ${data.power}%.`;
+								setZapLimits(data.time, data.power);
+								break;
+							case 'vibe':
+								output.message = `Setting ${data.initUser.split('#')[0]}'s vibe limit to ${data.time} seconds @ ${data.power}%.`;
+								setVibeLimits(data.time, data.power);
+								break;
+							default:
 
-							}
-							break;
-						default:
-					}
-
-					socket.emit('message', JSON.stringify(output));
+						}
+						break;
+					//-----------------------------------------------------------------------------
+					// freya
+					//-----------------------------------------------------------------------------
+					case 'freya':
+						switch (data.method) {
+							case 'home':
+								output.message = `Updating ${data.initUser.split('#')[0]}'s home channel.`;
+								updateDefaultChannel(data.channel);
+								break;
+							case 'connect':
+								output.message = `Connecting to ${data.initUser.split('#')[0]}'s collar for 30s.`;
+								// send light command (mode 1) @ 1% power for 30s
+								if(!isDev){
+									const pythonProcess = spawn('python',["./transmit.py", 1, 1, 30, config.commandOptions.vibe.defaultChannel]);
+									pythonProcess.stdout.on('data', function(data) {
+										console.log(data.toString());
+									});
+								}
+								else {
+									console.log("Dev...python script disabled...");
+								}
+								break;
+							default:
+						}
+						break;
+					default:
 				}
-				else {
-					// this user does not support the given command
-					output = {
-						success: false,
-						channel: data.channel,
-						message: `${data.username.split('#')[0]} does not support the ${data.command} command.`,
-						data: data
-					};
-					socket.emit('message', JSON.stringify(output));
-				}
+
+				socket.emit('message', JSON.stringify(output));
 			}
 			else {
 				// this user does not have permission to send commands
@@ -262,9 +273,22 @@ function setVibeLimits(time, power) {
 	saveConfig();
 }
 
+function updateDefaultChannel(channelId) {
+	config.defaultDiscordChannel = channelId;
+	saveConfig();
+}
+
 function saveConfig() {
 	var json = JSON.stringify(config, null, 2);
 	fs.writeFile('./config.json', json, 'utf8', () => {
 		console.log('Config update finished.');
 	});
+
+	let output = {
+		username: config.username,
+		defaultChannel: config.defaultDiscordChannel,
+		trustedUsers: config.trustedUsers,
+	};
+	// send user to server with new values
+	socket.emit('update', JSON.stringify(output));
 }
