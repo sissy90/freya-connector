@@ -217,7 +217,7 @@ socket.on('message', dataStr => {
 							output.message = `${data.username.split('#')[0]}'s machine is stopped`;
 							console.log('COMMAND => FM stopped');
 							if(!isDev){
-								const pythonProcess = spawn('python',["./hismith.py", 'stop', 0.5]);
+								const pythonProcess = spawn('python',["./hismith.py", 'stop', 1.5]);
 								pythonProcess.stdout.on('data', function(data) {
 									console.log(data.toString());
 								});
@@ -246,7 +246,7 @@ socket.on('message', dataStr => {
 								currentFMSpeed++;
 								console.log('COMMAND => Increasing FM speed from', currentFMSpeed, 'to', _level);
 								if(!isDev){
-									const pythonProcess = spawn('python',["./hismith.py", 'up', 0.5]);
+									const pythonProcess = spawn('python',["./hismith.py", 'up', 1.5]);
 									pythonProcess.stdout.on('data', function(data) {
 										console.log(data.toString());
 									});
@@ -260,7 +260,7 @@ socket.on('message', dataStr => {
 								currentFMSpeed--;
 								console.log('COMMAND => Decreasing FM speed', currentFMSpeed, 'to', _level);
 								if(!isDev){
-									const pythonProcess = spawn('python',["./hismith.py", 'down', 0.5]);
+									const pythonProcess = spawn('python',["./hismith.py", 'down', 1.5]);
 									pythonProcess.stdout.on('data', function(data) {
 										console.log(data.toString());
 									});
@@ -272,7 +272,7 @@ socket.on('message', dataStr => {
 							if(currentFMSpeed != _level) {
 								setTimeout(function() {
 									setSpeed(_level);
-								}, 800);
+								}, 2000);
 							}
 						}
 						console.log("test level:", data.level);
