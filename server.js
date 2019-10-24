@@ -1,8 +1,12 @@
 const io = require('socket.io-client');
 const fs = require('fs');
-var config = require('./config.json');
+var config = {};
+config = Object.assign(config, require('./config.json'));
+config = Object.assign(config, require('./userConfig.json'));
 var HttpProxyAgent = require('http-proxy-agent');
 
+// keep track of current FM speed
+var currentFMSpeed = 0;
 
 // import python script
 const spawn = require("child_process").spawn;
@@ -203,6 +207,79 @@ socket.on('message', dataStr => {
 							default:
 						}
 						break;
+					//-----------------------------------------------------------------------------
+					// fm
+					//-----------------------------------------------------------------------------
+					case 'fm':
+						// handle stop first
+						if(data.level == 'stop') {
+							currentFMSpeed = 0;
+							output.message = `${data.username.split('#')[0]}'s machine is stopped`;
+							console.log('COMMAND => FM stopped');
+							if(!isDev){
+								const pythonProcess = spawn('python',["./hismith.py", 'stop', 0.5]);
+								pythonProcess.stdout.on('data', function(data) {
+									console.log(data.toString());
+								});
+							}
+							break;
+						}
+
+						// don't send signal if already at min/max speed or speed already set
+						if(data.level == 7 && currentFMSpeed >= 7) {
+							output.message = `${data.username.split('#')[0]}'s machine is at max speed`;
+							break;
+						}
+						if(data.level == 1 && currentFMSpeed <= 1) {
+							output.message = `${data.username.split('#')[0]}'s machine is at min speed`;
+							break;
+						}
+						if(currentFMSpeed == data.speed) {
+							output.message = `${data.username.split('#')[0]}'s machine speed set to ${data.level}`;
+							break;
+						}
+
+						// send repeating signal until desired speed is reached
+						function setSpeed(_level) {
+							if(currentFMSpeed < _level) {
+								// increase level
+								currentFMSpeed++;
+								console.log('COMMAND => Increasing FM speed from', currentFMSpeed, 'to', _level);
+								if(!isDev){
+									const pythonProcess = spawn('python',["./hismith.py", 'up', 0.5]);
+									pythonProcess.stdout.on('data', function(data) {
+										console.log(data.toString());
+									});
+								}
+								else {
+									console.log("Dev...python script disabled...");
+								}
+							}
+							else {
+								// decrease level
+								currentFMSpeed--;
+								console.log('COMMAND => Decreasing FM speed', currentFMSpeed, 'to', _level);
+								if(!isDev){
+									const pythonProcess = spawn('python',["./hismith.py", 'down', 0.5]);
+									pythonProcess.stdout.on('data', function(data) {
+										console.log(data.toString());
+									});
+								}
+								else {
+									console.log("Dev...python script disabled...");
+								}
+							}
+							if(currentFMSpeed != _level) {
+								setTimeout(function() {
+									setSpeed(_level);
+								}, 800);
+							}
+						}
+						console.log("test level:", data.level);
+						setSpeed(data.level);
+						output.message = `${data.username.split('#')[0]}'s machine speed set to ${data.level}`;
+						break;
+
 					default:
 				}
 

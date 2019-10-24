@@ -45,7 +45,7 @@ You can get the kit I bought [here](https://amzn.to/2Hsg3Dj "https://amzn.to/2Hs
 ![](https://i.imgur.com/GC2wRDT.png)
 
 3. When Raspbian has been installed, click OK and your Raspberry Pi will restart and Raspbian will then boot up.
- 
+
 ![](https://i.imgur.com/8vC0NFM.png)
 
 
@@ -53,7 +53,7 @@ You can get the kit I bought [here](https://amzn.to/2Hsg3Dj "https://amzn.to/2Hs
 
 ### Fitting Hammer Header
     * Source: https://learn.pimoroni.com/tutorial/sandyj/fitting-hammer-headers
-    
+
 * It's important to hammer on a sturdy, stable, well-supported surface like a worktop or a solid wood table (although not your expensive dining table!)
 * The jig comes in three pieces, and has two nylon bolts. Snap apart the acrylic pieces, and peel off the protective film (although this isn't absolutely necessary).
 * **Note:** newer versions of the hammer header kit come with black metal bolts and nuts. The only difference is that the nuts go on top of your Pi Zero / W or pHAT to hold it securely to the baseplate while you hammer the header in.
@@ -92,7 +92,7 @@ You can get the kit I bought [here](https://amzn.to/2Hsg3Dj "https://amzn.to/2Hs
 
 ![](https://i.imgur.com/yqVXbAT.png)
 
-* Make sure that node, npm and git are installed simply by entering: 
+* Make sure that node, npm and git are installed simply by entering:
   * node -v
   * npm -v
   * git --version
@@ -100,22 +100,22 @@ You can get the kit I bought [here](https://amzn.to/2Hsg3Dj "https://amzn.to/2Hs
 ![](https://i.imgur.com/5QQMBAt.png)
 
 * The node version should be at least 8.x.x.
-* **Note:** If you don’t have a mouse this command lets you control the pointer with the numpad: 
-  * setxkbmap -option keypad:pointerkeys. 
-  * Press ctrl + shift + numlock to activate. 
+* **Note:** If you don’t have a mouse this command lets you control the pointer with the numpad:
+  * setxkbmap -option keypad:pointerkeys.
+  * Press ctrl + shift + numlock to activate.
 * Now run git and type:
   * git clone https://github.com/sissy90/freya-connector.git
 
 ![](https://i.imgur.com/74HC9ok.png)
 
-* In the terminal navigate to the project directory and install dependencies: 
+* In the terminal navigate to the project directory and install dependencies:
   * cd freya-connector
   * npm install
 
 ![](https://i.imgur.com/sZAsDSU.png)
 
-* Now you need to update your username in the config.json file. Still in the project directory run: 
-  * nano config.json
+* Now you need to update your username in the userConfig.json file. Still in the project directory run: 
+  * nano userConfig.json
 
 ![](https://i.imgur.com/RzS99Uu.png)
 
