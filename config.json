@@ -1,19 +1,7 @@
 {
   "server_dev": "localhost",
   "server_prod": "45.55.107.167",
-  "username": "sissy90#9698",
-  "commands": [
-    "zap",
-    "vibe",
-    "trust",
-    "limit"
-  ],
-  "trustedUsers": [
-    "Ashley#5112",
-    "sissy90#9698",
-    "HelloFrom-LV#6716",
-    "Misty#7321"
-  ],
+
   "commandOptions": {
     "zap": {
       "timeLimit": 4,
@@ -27,6 +15,5 @@
       "defaultChannel": "1",
       "transmitMode": 3
     }
-  },
-  "defaultDiscordChannel": "614949907803013125"
+  }
 }
