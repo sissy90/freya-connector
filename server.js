@@ -275,7 +275,7 @@ socket.on('message', dataStr => {
 								}, 2000);
 							}
 						}
-						console.log("test level:", data.level);
+						
 						setSpeed(data.level);
 						output.message = `${data.username.split('#')[0]}'s machine speed set to ${data.level}`;
 						break;
