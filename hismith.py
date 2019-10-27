@@ -8,8 +8,8 @@ import time # for sleep()
 import sys # to import variables from command line call
 
 ## grab the vars from the arguments passed to this program
-mode_ = int(sys.argv[1]) # either up, down, or stop
-time_ = int(sys.argv[2])
+mode_ = sys.argv[1] # either up, down, or stop
+time_ = float(sys.argv[2])
 
 up_seq = '0101000001010101000000110'
 down_seq = '0101000001010101001100000'
@@ -49,7 +49,7 @@ def transmitter(sequence, time_):
 	# sequence_wave.append(pigpio.pulse(1<<G1, 0, start_bit))
 	# sequence_wave.append(pigpio.pulse(0, 1<<G1, start_delay))
 
-	for x in range(0, 26): #adds the sequence bits to the waveform, in order.
+	for x in range(0, 25): #adds the sequence bits to the waveform, in order.
 		if int(sequence[x]) == 0:
 			sequence_wave.append(pigpio.pulse(1<<G1, 0, zero_bit)) ## fix
 			sequence_wave.append(pigpio.pulse(0, 1<<G1, zero_delay))
