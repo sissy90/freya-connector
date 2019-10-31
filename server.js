@@ -1,8 +1,8 @@
 const io = require('socket.io-client');
 const fs = require('fs');
-var config = {};
-config = Object.assign(config, require('./config.json'));
-config = Object.assign(config, require('./userConfig.json'));
+
+var config = require('./config.json');
+var userConfig = require('./userConfig.json');
 var HttpProxyAgent = require('http-proxy-agent');
 
 // keep track of current FM speed
@@ -47,9 +47,9 @@ socket.on('connect', () => {
 	console.log("socket is open");
 	// connect to server and set username
 	let output = {
-		username: config.username,
-		defaultChannel: config.defaultDiscordChannel,
-		trustedUsers: config.trustedUsers
+		username: userConfig.username,
+		defaultChannel: userConfig.defaultDiscordChannel,
+		trustedUsers: userConfig.trustedUsers
 	};
 	socket.emit('userconnect', JSON.stringify(output));
 });
@@ -90,7 +90,7 @@ socket.on('message', dataStr => {
 		else {
 			// check if the initiating user has permission to send commands
 			let validUser = false;
-			validUser = (config.trustedUsers.indexOf(data.initUser) !== -1 || data.initUser == config.username);
+			validUser = (userConfig.trustedUsers.indexOf(data.initUser) !== -1 || data.initUser == userConfig.username);
 			if(validUser) {
 				// we have a valid user, now check supported commands
 				output = {
@@ -157,8 +157,8 @@ socket.on('message', dataStr => {
 								break;
 							case 'list':
 								output.message = `${data.initUser.split('#')[0]}'s trusted users:`;
-								for (var i = 0; i < config.trustedUsers.length; i++) {
-									output.message += `\n${config.trustedUsers[i].split('#')[0]}`
+								for (var i = 0; i < userConfig.trustedUsers.length; i++) {
+									output.message += `\n${userConfig.trustedUsers[i].split('#')[0]}`
 								}
 								break;
 							default:
@@ -322,19 +322,19 @@ if(!isDev){
 // --------------------------- [private methods] ------------------------------
 // ----------------------------------------------------------------------------
 function addTrustedUser(username) {
-	if(config.trustedUsers.indexOf(username) === -1) {
+	if(userConfig.trustedUsers.indexOf(username) === -1) {
 		// only add the user if it's not already there
-		config.trustedUsers.push(username);
-		saveConfig();
+		userConfig.trustedUsers.push(username);
+		saveUserConfig();
 	}
 }
 
 function removeTrustedUser(username) {
-	var index = config.trustedUsers.indexOf(username);
+	var index = userConfig.trustedUsers.indexOf(username);
 	if(index !== -1) {
 		// only remove the user if they are already there
-		config.trustedUsers.splice(index, 1);
-		saveConfig();
+		userConfig.trustedUsers.splice(index, 1);
+		saveUserConfig();
 	}
 }
 
@@ -351,8 +351,8 @@ function setVibeLimits(time, power) {
 }
 
 function updateDefaultChannel(channelId) {
-	config.defaultDiscordChannel = channelId;
-	saveConfig();
+	userConfig.defaultDiscordChannel = channelId;
+	saveUserConfig();
 }
 
 function saveConfig() {
@@ -360,11 +360,18 @@ function saveConfig() {
 	fs.writeFile('./config.json', json, 'utf8', () => {
 		console.log('Config update finished.');
 	});
+}
+
+function saveUserConfig() {
+	var json = JSON.stringify(userConfig, null, 2);
+	fs.writeFile('./userConfig.json', json, 'utf8', () => {
+		console.log('Config update finished.');
+	});
 
 	let output = {
-		username: config.username,
-		defaultChannel: config.defaultDiscordChannel,
-		trustedUsers: config.trustedUsers,
+		username: userConfig.username,
+		defaultChannel: userConfig.defaultDiscordChannel,
+		trustedUsers: userConfig.trustedUsers,
 	};
 	// send user to server with new values
 	socket.emit('update', JSON.stringify(output));
